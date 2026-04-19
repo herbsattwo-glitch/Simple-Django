@@ -1,0 +1,432 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To-Do Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Google Fonts (Optional - for better typography) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+    <!-- ====== ANIMATED BACKGROUND ELEMENTS ====== -->
+    
+    <!-- Aurora Waves -->
+    <div class="aurora-bg">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Glowing Pulse Ring -->
+    <div class="glow-ring"></div>
+    <div class="glow-ring glow-ring-2"></div>
+
+    <!-- Floating Orbs (Extra decorative elements) -->
+    <div class="floating-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="orb orb-4"></div>
+    </div>
+
+    <!-- ====== MAIN CONTENT ====== -->
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg mb-4 glass-nav">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <span class="brand-icon">📝</span> 
+                <span class="brand-text">To-Do Pro</span>
+            </a>
+            
+            <!-- Dark Mode Toggle in Navbar -->
+            <div class="d-flex align-items-center">
+                <button id="toggle-dark" class="btn btn-glass dark-toggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon moon-icon"></i>
+                    <i class="fas fa-sun sun-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+
+        <!-- Page Title with Animation -->
+        <div class="title-wrapper text-center mb-4">
+            <h1 class="page-title">
+                <span class="title-icon"><i class="fas fa-tasks"></i></span>
+                Manage Your Tasks
+            </h1>
+            <p class="subtitle">Stay organized, stay productive</p>
+        </div>
+
+        <!-- Add Task Form - Glass Card -->
+        <div class="glass-card form-card mb-4">
+            <form method="POST" class="add-task-form" action="{% url 'index' %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <span class="input-group-text glass-input-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        name="title" 
+                        class="form-control glass-input" 
+                        placeholder="What needs to be done?" 
+                        required 
+                        maxlength="200" 
+                        aria-label="New task title"
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="btn btn-primary btn-glow">
+                        <i class="fas fa-plus"></i>
+                        <span class="btn-text">Add Task</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Task Stats Bar -->
+        <div class="stats-bar glass-card mb-4">
+            <div class="stat-item">
+                <i class="fas fa-list-check stat-icon"></i>
+                <span class="stat-value">{{ tasks|length }}</span>
+                <span class="stat-label">Total Tasks</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <i class="fas fa-circle-check stat-icon text-success"></i>
+                <span class="stat-value completed-count">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <i class="fas fa-clock stat-icon text-warning"></i>
+                <span class="stat-value pending-count">0</span>
+                <span class="stat-label">Pending</span>
+            </div>
+        </div>
+
+        <!-- Task List Container -->
+        <div class="task-list-container">
+            <div class="task-list-header">
+                <h5 class="task-list-title">
+                    <i class="fas fa-inbox"></i> Your Tasks
+                </h5>
+            </div>
+
+            <!-- Task List -->
+            <div class="task-list">
+                {% for task in tasks %}
+                    <div class="card task-card {% if task.completed %}task-completed{% endif %}" data-task-id="{{ task.id }}">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div class="task-content">
+                                <span class="task-status-indicator {% if task.completed %}completed{% endif %}"></span>
+                                <span class="task-title {% if task.completed %}completed{% endif %}">
+                                    {{ task.title }}
+                                </span>
+                            </div>
+                            <div class="task-actions">
+                                <a href="{% url 'toggle_task' task.id %}" 
+                                   class="btn btn-sm btn-action {% if task.completed %}btn-undo{% else %}btn-complete{% endif %}"
+                                   title="{% if task.completed %}Mark as pending{% else %}Mark as complete{% endif %}">
+                                    {% if task.completed %}
+                                        <i class="fas fa-undo"></i>
+                                        <span class="action-text">Undo</span>
+                                    {% else %}
+                                        <i class="fas fa-check"></i>
+                                        <span class="action-text">Done</span>
+                                    {% endif %}
+                                </a>
+                                <a href="{% url 'delete_task' task.id %}" 
+                                   class="btn btn-sm btn-action btn-delete"
+                                   title="Delete task"
+                                   onclick="return confirmDelete(this)">
+                                    <i class="fas fa-trash"></i>
+                                    <span class="action-text">Delete</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress bar for completed tasks -->
+                        {% if task.completed %}
+                        <div class="task-completed-bar"></div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <div class="empty-state glass-card">
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h4 class="empty-title">No tasks yet!</h4>
+                        <p class="empty-subtitle">Add your first task above to get started</p>
+                        <div class="empty-animation">
+                            <div class="empty-dot"></div>
+                            <div class="empty-dot"></div>
+                            <div class="empty-dot"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer text-center mt-5">
+            <p class="footer-text">
+                <i class="fas fa-heart heart-icon"></i> 
+                Made with Django & Bootstrap
+            </p>
+            <p class="footer-copyright">© 2024 To-Do Pro. Stay productive!</p>
+        </footer>
+
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="notification-toast" class="toast glass-toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-bell toast-icon me-2"></i>
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Task updated successfully!
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SCRIPTS ====== -->
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Enhanced Dark Mode & Interactions Script -->
+    <script>
+        // ====== DARK MODE TOGGLE WITH PERSISTENCE ======
+        const toggleBtn = document.getElementById('toggle-dark');
+        const body = document.body;
+        
+        // Check for saved preference or system preference
+        function initDarkMode() {
+            const savedMode = localStorage.getItem('darkMode');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedMode === 'enabled' || (savedMode === null && prefersDark)) {
+                body.classList.add('dark-mode');
+                updateToggleIcon(true);
+            } else {
+                updateToggleIcon(false);
+            }
+        }
+        
+        // Update the toggle button icon
+        function updateToggleIcon(isDark) {
+            const moonIcon = document.querySelector('.moon-icon');
+            const sunIcon = document.querySelector('.sun-icon');
+            
+            if (isDark) {
+                moonIcon.style.opacity = '0';
+                moonIcon.style.transform = 'rotate(180deg) scale(0)';
+                sunIcon.style.opacity = '1';
+                sunIcon.style.transform = 'rotate(0deg) scale(1)';
+            } else {
+                moonIcon.style.opacity = '1';
+                moonIcon.style.transform = 'rotate(0deg) scale(1)';
+                sunIcon.style.opacity = '0';
+                sunIcon.style.transform = 'rotate(-180deg) scale(0)';
+            }
+        }
+        
+        // Toggle dark mode
+        toggleBtn.addEventListener('click', function() {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+            updateToggleIcon(isDark);
+            
+            // Add animation feedback
+            this.classList.add('toggle-animate');
+            setTimeout(() => this.classList.remove('toggle-animate'), 300);
+        });
+        
+        // Initialize on page load
+        initDarkMode();
+
+        // ====== TASK STATS COUNTER ======
+        function updateStats() {
+            const tasks = document.querySelectorAll('.task-card');
+            const completed = document.querySelectorAll('.task-card.task-completed');
+            
+            const completedCount = document.querySelector('.completed-count');
+            const pendingCount = document.querySelector('.pending-count');
+            
+            if (completedCount && pendingCount) {
+                completedCount.textContent = completed.length;
+                pendingCount.textContent = tasks.length - completed.length;
+            }
+        }
+        updateStats();
+
+        // ====== DELETE CONFIRMATION ======
+        function confirmDelete(element) {
+            const card = element.closest('.task-card');
+            
+            if (confirm('Are you sure you want to delete this task?')) {
+                card.classList.add('removing');
+                setTimeout(() => {
+                    window.location.href = element.href;
+                }, 400);
+                return false;
+            }
+            return false;
+        }
+
+        // ====== TASK CARD ANIMATIONS ======
+        document.querySelectorAll('.task-card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.08}s`;
+        });
+
+        // ====== INPUT FOCUS EFFECTS ======
+        const taskInput = document.querySelector('.glass-input');
+        if (taskInput) {
+            taskInput.addEventListener('focus', function() {
+                this.closest('.form-card').classList.add('form-focused');
+            });
+            
+            taskInput.addEventListener('blur', function() {
+                this.closest('.form-card').classList.remove('form-focused');
+            });
+        }
+
+        // ====== RIPPLE EFFECT FOR BUTTONS ======
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // ====== NAVBAR SCROLL EFFECT ======
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.glass-nav');
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
+                navbar.classList.add('nav-scrolled');
+            } else {
+                navbar.classList.remove('nav-scrolled');
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // ====== PARALLAX EFFECT FOR ORBS ======
+        document.addEventListener('mousemove', (e) => {
+            const orbs = document.querySelectorAll('.orb');
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+            
+            orbs.forEach((orb, index) => {
+                const speed = (index + 1) * 10;
+                orb.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+
+        // ====== TYPING PLACEHOLDER EFFECT ======
+        const placeholders = [
+            "What needs to be done?",
+            "Buy groceries...",
+            "Finish homework...",
+            "Call mom...",
+            "Go to the gym...",
+            "Read a book...",
+            "Clean the house..."
+        ];
+        
+        let placeholderIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 100;
+        
+        function typePlaceholder() {
+            const input = document.querySelector('.glass-input');
+            if (!input || document.activeElement === input) {
+                setTimeout(typePlaceholder, 1000);
+                return;
+            }
+            
+            const current = placeholders[placeholderIndex];
+            
+            if (isDeleting) {
+                input.placeholder = current.substring(0, charIndex - 1);
+                charIndex--;
+                typingSpeed = 50;
+            } else {
+                input.placeholder = current.substring(0, charIndex + 1);
+                charIndex++;
+                typingSpeed = 100;
+            }
+            
+            if (!isDeleting && charIndex === current.length) {
+                isDeleting = true;
+                typingSpeed = 2000; // Pause at end
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                placeholderIndex = (placeholderIndex + 1) % placeholders.length;
+                typingSpeed = 500; // Pause before typing next
+            }
+            
+            setTimeout(typePlaceholder, typingSpeed);
+        }
+        
+        // Start typing effect after a delay
+        setTimeout(typePlaceholder, 2000);
+    </script>
+
+</body>
+</html>
